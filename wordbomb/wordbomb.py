@@ -14,6 +14,9 @@ class WordBomb(commands.Cog):
         self.c = self.db.cursor()
 
     async def get_word(self):
+        """
+        Get a random word and a random substring from the word.
+        """
         word = random.choice(self.words)
         word_length = len(word)
 
@@ -184,6 +187,9 @@ class WordBomb(commands.Cog):
             # get new word and substring
             word, substring = await self.get_word()
 
+            # get the number of words that contain the substring
+            num_words = len(await self.filter_words(substring))
+
             # update database
             self.c.execute(
                 "UPDATE guilds SET last_word=?, last_substring=? WHERE id=? and channel_id=?",
@@ -199,7 +205,7 @@ class WordBomb(commands.Cog):
             # send message
             embed = discord.Embed(
                 title="Word Bomb",
-                description=f"Correct! The last word was `{last_word}`. The new substring is `{substring}`."
+                description=f"Correct! The last word was `{last_word}`. The new substring is `{substring}`. There are {num_words} words that contain this substring."
             )
             await message.channel.send(embed=embed)
 
