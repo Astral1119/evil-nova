@@ -128,6 +128,25 @@ class WordBomb(commands.Cog):
         else:
             await ctx.send(f"{userid.mention} has a score of {score[0]}!")
 
+    @commands.hybrid_command()
+    async def get_hint(self, ctx):
+        """
+        Send an ephemeral message with the current word.
+        """
+        # get guild id, channel id
+        guild_id = ctx.guild.id
+        channel_id = ctx.channel.id
+
+        # get last word
+        self.c.execute("SELECT last_word FROM guilds WHERE id=? and channel_id=?", (guild_id, channel_id))
+        last_word = self.c.fetchone()
+
+        # send message
+        if not last_word:
+            await ctx.send("No game started in this server!")
+        else:
+            await ctx.send(f"The last word was `{last_word[0]}`.", ephemeral=True)
+
     @commands.Cog.listener()
     async def on_message(self, message):
         # check if the message is from a bot
