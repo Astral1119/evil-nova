@@ -147,6 +147,23 @@ class WordBomb(commands.Cog):
         else:
             await ctx.send(f"The last word was `{last_word[0]}`.", ephemeral=True)
 
+    @commands.hybrid_command()
+    async def prompt(self, ctx, substring: str):
+        """
+        Send an ephemeral message with all possible words that contain the substring.
+        (max 20 words)
+        """
+        # get words that contain the substring
+        words = await self.filter_words(substring)
+
+        # send message
+        if not words:
+            await ctx.send("No words found!")
+        else:
+            if len(words) > 20:
+                words = words[:20]
+            await ctx.send(f"Words that contain `{substring}`: {', '.join(words)}", ephemeral=True)
+
     @commands.Cog.listener()
     async def on_message(self, message):
         # check if the message is from a bot
