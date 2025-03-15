@@ -15,13 +15,21 @@ class WordBomb(commands.Cog):
 
     async def get_word(self):
         word = random.choice(self.words)
+        word_length = len(word)
 
         # get random substring
-        # the ideal substring is between 1/4 and 3/4 of the word
-        # but no longer than 5 characters
-        start = random.randint(len(word) // 4, len(word) // 2)
-        end = random.randint(len(word) // 2, len(word) * 3 // 4)
-        end = min(end, start + 5)
+        # ideally between 3-5 characters
+        # check word length
+        # if word length is less than 5
+        # then substring length is word length
+        if word_length < 5:
+            substring_length = word_length
+        else:
+            substring_length = random.randint(3, 5)
+        
+        # get random start index
+        start = random.randint(0, word_length - substring_length)
+        end = start + substring_length
         substring = word[start:end]
 
         return word, substring
@@ -96,6 +104,29 @@ class WordBomb(commands.Cog):
             description=f"Game started! The substring is `{substring}`."
         )
         await ctx.send(embed=embed)
+
+    @commands.hybrid_command()
+    async def get_score(self, ctx, userid: discord.User = None):
+        """
+        Get the score of a user in the current channel.
+        """
+        # get guild id, channel id
+        guild_id = ctx.guild.id
+        channel_id = ctx.channel.id
+
+        # get user id
+        if not userid:
+            userid = ctx.author
+
+        # get user's score
+        self.c.execute("SELECT score FROM scores WHERE user_id=? and guild_id=?", (userid.id, guild_id))
+        score = self.c.fetchone()
+
+        # send message
+        if not score:
+            await ctx.send("User has no score!")
+        else:
+            await ctx.send(f"{userid.mention} has a score of {score[0]}!")
 
     @commands.Cog.listener()
     async def on_message(self, message):
