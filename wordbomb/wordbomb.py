@@ -177,11 +177,15 @@ class WordBomb(commands.Cog):
         channel_id = ctx.channel.id
 
         # get total messages
-        self.c.execute("SELECT count(*) FROM messages WHERE guild_id=? and channel_id=?", (guild_id, channel_id))
-        total_messages = self.c.fetchone()
+        # we pull all scores from the scores table and sum them
+        self.c.execute("SELECT SUM(score) FROM scores WHERE guild_id=?", (guild_id,))
+        total = self.c.fetchone()
 
         # send message
-        await ctx.send(f"Total messages: {total_messages[0]}")
+        if not total:
+            await ctx.send("No game started in this server!")
+        else:
+            await ctx.send(f"Total messages: {total[0]}")
 
     @commands.Cog.listener()
     async def on_message(self, message):
