@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import random
 import sqlite3
+from typing import Optional
 
 class WordBomb(commands.Cog):
     def __init__(self, client):
@@ -109,17 +110,18 @@ class WordBomb(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.hybrid_command()
-    async def get_score(self, ctx, userid: discord.User = None):
+    async def get_score(self, ctx, userid: Optional[discord.Member] = None):
         """
         Get the score of a user in the current channel.
         """
-        # get guild id, channel id
+        # get guild id
         guild_id = ctx.guild.id
-        channel_id = ctx.channel.id
 
         # get user id
         if not userid:
             userid = ctx.author
+
+        assert(userid)
 
         # get user's score
         self.c.execute("SELECT score FROM scores WHERE user_id=? and guild_id=?", (userid.id, guild_id))
