@@ -28,36 +28,45 @@ async def sync(ctx):
         print(e)
     await ctx.send('Synced!')
 
-
-# lets owner send an embed to a channel
 @bot.hybrid_command()
 @commands.is_owner()
-async def send_embed(ctx, guild_id: int, channel_id: int, content: str):
+async def send_embed(ctx, guild_id: int, channel_id: int, *, content: str):
     """
     Send an embed to a channel
-    Content will be in JSON format, with the following keys:
-    - title (str)
-    - description (str)
-    - color (int)
+    Content should be in JSON format, sent inside a code block.
     """
-    
     try:
-        # load content as json
+        # Strip code block formatting if present
+        if content.startswith("```") and content.endswith("```"):
+            content = content[3:-3].strip()
+
+        # Load content as JSON
         content_dict = json.loads(content)
         embed = discord.Embed.from_dict(content_dict)
 
-        # get guild and channel
+        # Get guild and channel
         guild = bot.get_guild(guild_id)
-        assert(guild is not None)
-        channel = guild.get_channel(channel_id)
-        assert(isinstance(channel, discord.TextChannel))
+        if guild is None:
+            await ctx.send(f"❌ Guild with ID `{guild_id}` not found.")
+            return
 
-        # send embed
+        channel = guild.get_channel(channel_id)
+        if channel is None or not isinstance(channel, discord.TextChannel):
+            await ctx.send(f"❌ Channel with ID `{channel_id}` not found or invalid.")
+            return
+
+        # Send embed
         await channel.send(embed=embed)
-        await ctx.send(f'Embed sent to {guild.name} → #{channel.name}')
-    except Exception as e:
-        await ctx.send(f'Error: {e}')
+        await ctx.send(f'✅ Embed sent to {guild.name} → #{channel.name}')
     
+    except json.JSONDecodeError:
+        await ctx.send("❌ Invalid JSON format. Ensure the content is valid JSON.")
+    except Exception as e:
+        await ctx.send(f"❌ Error: {e}")
+
+
+        content_dict = json.loads(content)
+        embed = discord.Embed.from_dict(content_dict)
 
 
 @bot.event
