@@ -167,6 +167,22 @@ class WordBomb(commands.Cog):
                 words = words[:20]
             await ctx.send(f"Words that contain `{substring}`: {', '.join(words)}", ephemeral=True)
 
+    @commands.hybrid_command()
+    async def total_messages(self, ctx):
+        """
+        Gets the number of words people have guessed in the current channel.
+        """
+        # get guild id, channel id
+        guild_id = ctx.guild.id
+        channel_id = ctx.channel.id
+
+        # get total messages
+        self.c.execute("SELECT count(*) FROM messages WHERE guild_id=? and channel_id=?", (guild_id, channel_id))
+        total_messages = self.c.fetchone()
+
+        # send message
+        await ctx.send(f"Total messages: {total_messages[0]}")
+
     @commands.Cog.listener()
     async def on_message(self, message):
         # check if the message is from a bot
