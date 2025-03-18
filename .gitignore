@@ -1,5 +1,5 @@
 .DS_Store
 .env
 venv
-wordbomb/__pycache__
+*/__pycache__
 wordbomb/wordbomb.db
