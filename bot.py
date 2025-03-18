@@ -54,6 +54,7 @@ async def send_embed(ctx, guild_id: int, channel_id: int, content: str):
 
         # send embed
         await channel.send(embed=embed)
+        await ctx.send(f'Embed sent to {guild.name} → #{channel.name}')
     except Exception as e:
         await ctx.send(f'Error: {e}')
     
