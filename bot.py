@@ -19,7 +19,7 @@ async def load_cogs():
     await bot.load_extension('wordbomb.wordbomb')
 
 # hybrid command for syncing
-@commands.hybrid_command()
+@bot.hybrid_command()
 @commands.is_owner()
 async def sync(ctx):
     try:
@@ -30,9 +30,9 @@ async def sync(ctx):
 
 
 # lets owner send an embed to a channel
-@commands.hybrid_command()
+@bot.hybrid_command()
 @commands.is_owner()
-async def send_embed(ctx, channel: discord.TextChannel, *, content: str):
+async def send_embed(ctx, guild_id: int, channel_id: int, content: str):
     """
     Send an embed to a channel
     Content will be in JSON format, with the following keys:
@@ -42,8 +42,17 @@ async def send_embed(ctx, channel: discord.TextChannel, *, content: str):
     """
     
     try:
+        # load content as json
         content_dict = json.loads(content)
         embed = discord.Embed.from_dict(content_dict)
+
+        # get guild and channel
+        guild = bot.get_guild(guild_id)
+        assert(guild is not None)
+        channel = guild.get_channel(channel_id)
+        assert(isinstance(channel, discord.TextChannel))
+
+        # send embed
         await channel.send(embed=embed)
     except Exception as e:
         await ctx.send(f'Error: {e}')
