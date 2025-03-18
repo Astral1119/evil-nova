@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 import dotenv
 import os
+import json
 
 dotenv.load_dotenv()
 TOKEN = os.getenv('TOKEN') or ''
@@ -26,6 +27,28 @@ async def sync(ctx):
     except Exception as e:
         print(e)
     await ctx.send('Synced!')
+
+
+# lets owner send an embed to a channel
+@commands.hybrid_command()
+@commands.is_owner()
+async def send_embed(ctx, channel: discord.TextChannel, *, content: str):
+    """
+    Send an embed to a channel
+    Content will be in JSON format, with the following keys:
+    - title (str)
+    - description (str)
+    - color (int)
+    """
+    
+    try:
+        content_dict = json.loads(content)
+        embed = discord.Embed.from_dict(content_dict)
+        await channel.send(embed=embed)
+    except Exception as e:
+        await ctx.send(f'Error: {e}')
+    
+
 
 @bot.event
 async def on_ready():
